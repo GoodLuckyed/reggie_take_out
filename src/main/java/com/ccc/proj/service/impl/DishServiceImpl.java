@@ -16,9 +16,11 @@ import com.ccc.proj.service.SetmealService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +39,9 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
 
     @Autowired
     private SetmealService setmealService;
+
+    @Resource
+    private RedisTemplate redisTemplate;
 
     /**
      * 新增菜品，同时保存对应口味数据
@@ -124,6 +129,11 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
             return item;
         }).collect(Collectors.toList());
         this.updateBatchById(list);
+        list.forEach(dish -> {
+            //清理某个分类下面的菜品缓存数据
+            String key = "dish_" + dish.getCategoryId() + "_1" ;
+            redisTemplate.delete(key);
+        });
 
         //菜品停售,菜品关联的套餐不能起售
         if (status == 0) {
