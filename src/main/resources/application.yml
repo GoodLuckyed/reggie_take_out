@@ -38,7 +38,7 @@ spring:
     allow-bean-definition-overriding: true #允许bean定义覆盖
 
   redis:
-    host: 192.168.10.132
+    host: 192.168.10.133
     port: 6379
     database: 0
   cache:
